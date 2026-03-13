@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>Arcade - Jocuri Avansate</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;text-align:center}
+h1{margin-top:20px}
+.container{background:#1e293b;padding:20px;border-radius:14px;margin:25px auto;width:500px;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
+button{padding:10px 16px;margin:6px;border:none;border-radius:8px;background:#38bdf8;color:black;font-weight:bold;cursor:pointer}
+canvas{background:black;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
+.cell{background:#334155;padding:25px;font-size:24px;cursor:pointer}
+.card{display:inline-block;width:60px;height:60px;background:#334155;margin:5px;font-size:26px;line-height:60px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<h1>🎮 Arcade cu Jocuri Avansate</h1>
+
+<div class="container">
+<h2>🐍 Snake</h2>
+<canvas id="snake" width="400" height="400"></canvas>
+<p>Folosește săgețile</p>
+</div>
+
+<div class="container">
+<h2>❌⭕ X și 0</h2>
+<div class="grid" id="tic"></div>
+<p id="ticResult"></p>
+</div>
+
+<div class="container">
+<h2>🧠 Memory</h2>
+<div id="memory"></div>
+</div>
+
+<div class="container">
+<h2>🎲 Zar</h2>
+<button onclick="rollDice()">Aruncă</button>
+<p id="dice"></p>
+</div>
+
+<div class="container">
+<h2>🪙 Monedă</h2>
+<button onclick="coin()">Aruncă</button>
+<p id="coin"></p>
+</div>
+
+<script>
+
+// SNAKE
+const canvas=document.getElementById('snake');
+const ctx=canvas.getContext('2d');
+let snake=[{x:200,y:200}];
+let food={x:100,y:100};
+let dx=20;
+let dy=0;
+
+function drawSnake(){
+ctx.fillStyle='lime';
+snake.forEach(p=>ctx.fillRect(p.x,p.y,20,20));
+}
+
+function drawFood(){
+ctx.fillStyle='red';
+ctx.fillRect(food.x,food.y,20,20);
+}
+
+function move(){
+const head={x:snake[0].x+dx,y:snake[0].y+dy};
+snake.unshift(head);
+
+if(head.x===food.x && head.y===food.y){
+food.x=Math.floor(Math.random()*20)*20;
+food.y=Math.floor(Math.random()*20)*20;
+}else{
+snake.pop();
+}
+}
+
+function game(){
+ctx.clearRect(0,0,400,400);
+move();
+drawSnake();
+drawFood();
+}
+
+setInterval(game,120);
+
+window.addEventListener('keydown',e=>{
+if(e.key==='ArrowUp'){dx=0;dy=-20}
+if(e.key==='ArrowDown'){dx=0;dy=20}
+if(e.key==='ArrowLeft'){dx=-20;dy=0}
+if(e.key==='ArrowRight'){dx=20;dy=0}
+});
+
+// TIC TAC TOE
+const board=document.getElementById('tic');
+let cells=[];
+let player='X';
+
+for(let i=0;i<9;i++){
+let c=document.createElement('div');
+c.className='cell';
+c.onclick=()=>play(i);
+board.appendChild(c);
+cells.push(c);
+}
+
+function play(i){
+if(cells[i].innerText!='')return;
+cells[i].innerText=player;
+player=player==='X'?'O':'X';
+}
+
+// MEMORY
+const icons=['🍎','🍌','🍇','🍒','🍎','🍌','🍇','🍒'];
+icons.sort(()=>Math.random()-0.5);
+const mem=document.getElementById('memory');
+let opened=[];
+
+icons.forEach((icon,i)=>{
+let card=document.createElement('div');
+card.className='card';
+card.innerText='?';
+card.onclick=()=>flip(card,icon);
+mem.appendChild(card);
+});
+
+function flip(card,icon){
+card.innerText=icon;
+opened.push({card,icon});
+
+if(opened.length===2){
+setTimeout(()=>{
+if(opened[0].icon!==opened[1].icon){
+opened[0].card.innerText='?';
+opened[1].card.innerText='?';
+}
+opened=[];
+},700);
+}
+}
+
+function rollDice(){
+let n=Math.floor(Math.random()*6)+1;
+document.getElementById('dice').innerText='Zar: '+n;
+}
+
+function coin(){
+let r=Math.random()<0.5?'Cap':'Pajura';
+document.getElementById('coin').innerText=r;
+}
+
+</script>
+
+</body>
+</html>
