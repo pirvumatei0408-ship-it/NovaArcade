@@ -157,3 +157,36 @@ document.getElementById('coin').innerText=r;
 
 </body>
 </html>
+// verifică pereți
+if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400){
+alert("Game Over");
+snake=[{x:200,y:200}];
+dx=20;
+dy=0;
+}
+function checkWin(){
+const w=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+for(let combo of w){
+let a=cells[combo[0]].innerText;
+let b=cells[combo[1]].innerText;
+let c=cells[combo[2]].innerText;
+
+if(a && a===b && a===c){
+document.getElementById("ticResult").innerText="Câștigă "+a;
+}
+}
+}
+function play(i){
+if(cells[i].innerText!='')return;
+cells[i].innerText=player;
+checkWin();
+player=player==='X'?'O':'X';
+}<h2>Alege un joc</h2>
+<button onclick="window.scrollTo(0,200)">Snake</button>
+<button onclick="window.scrollTo(0,600)">X și 0</button>
+<button onclick="window.scrollTo(0,1000)">Memory</button>
