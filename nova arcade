@@ -2,52 +2,68 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>Arcade - Jocuri Avansate</title>
+<title>NovaArcade - Jocuri</title>
 <style>
-body{font-family:Arial;background:#0f172a;color:white;text-align:center}
+body{font-family:Arial;background:#0f172a;color:white;text-align:center;margin:0}
 h1{margin-top:20px}
-.container{background:#1e293b;padding:20px;border-radius:14px;margin:25px auto;width:500px;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
+.menu{margin:20px}
+.container{background:#1e293b;padding:20px;border-radius:14px;margin:40px auto;width:520px;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
 button{padding:10px 16px;margin:6px;border:none;border-radius:8px;background:#38bdf8;color:black;font-weight:bold;cursor:pointer}
 canvas{background:black;border-radius:8px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
 .cell{background:#334155;padding:25px;font-size:24px;cursor:pointer}
-.card{display:inline-block;width:60px;height:60px;background:#334155;margin:5px;font-size:26px;line-height:60px;cursor:pointer}
+.card{display:inline-block;width:70px;height:70px;background:#334155;margin:5px;font-size:30px;line-height:70px;cursor:pointer;border-radius:8px}
 </style>
 </head>
 <body>
 
-<h1>🎮 Arcade cu Jocuri Avansate</h1>
+<h1>🎮 NovaArcade</h1>
+<p>Alege un joc</p>
 
-<div class="container">
+<div class="menu">
+<button onclick="scrollToGame('snakeGame')">Snake</button>
+<button onclick="scrollToGame('ticGame')">X și 0</button>
+<button onclick="scrollToGame('memoryGame')">Memory</button>
+<button onclick="scrollToGame('diceGame')">Zar</button>
+<button onclick="scrollToGame('coinGame')">Monedă</button>
+</div>
+
+<div class="container" id="snakeGame">
 <h2>🐍 Snake</h2>
 <canvas id="snake" width="400" height="400"></canvas>
 <p>Folosește săgețile</p>
 </div>
 
-<div class="container">
+<div class="container" id="ticGame">
 <h2>❌⭕ X și 0</h2>
 <div class="grid" id="tic"></div>
 <p id="ticResult"></p>
+<button onclick="resetTic()">Restart</button>
 </div>
 
-<div class="container">
+<div class="container" id="memoryGame">
 <h2>🧠 Memory</h2>
 <div id="memory"></div>
+<button onclick="resetMemory()">Restart</button>
 </div>
 
-<div class="container">
+<div class="container" id="diceGame">
 <h2>🎲 Zar</h2>
 <button onclick="rollDice()">Aruncă</button>
 <p id="dice"></p>
 </div>
 
-<div class="container">
+<div class="container" id="coinGame">
 <h2>🪙 Monedă</h2>
 <button onclick="coin()">Aruncă</button>
 <p id="coin"></p>
 </div>
 
 <script>
+
+function scrollToGame(id){
+document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
 
 // SNAKE
 const canvas=document.getElementById('snake');
@@ -69,6 +85,15 @@ ctx.fillRect(food.x,food.y,20,20);
 
 function move(){
 const head={x:snake[0].x+dx,y:snake[0].y+dy};
+
+if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400){
+alert('Game Over');
+snake=[{x:200,y:200}];
+dx=20;
+dy=0;
+return;
+}
+
 snake.unshift(head);
 
 if(head.x===food.x && head.y===food.y){
@@ -89,10 +114,10 @@ drawFood();
 setInterval(game,120);
 
 window.addEventListener('keydown',e=>{
-if(e.key==='ArrowUp'){dx=0;dy=-20}
-if(e.key==='ArrowDown'){dx=0;dy=20}
-if(e.key==='ArrowLeft'){dx=-20;dy=0}
-if(e.key==='ArrowRight'){dx=20;dy=0}
+if(e.key==='ArrowUp' && dy===0){dx=0;dy=-20}
+if(e.key==='ArrowDown' && dy===0){dx=0;dy=20}
+if(e.key==='ArrowLeft' && dx===0){dx=-20;dy=0}
+if(e.key==='ArrowRight' && dx===0){dx=20;dy=0}
 });
 
 // TIC TAC TOE
@@ -110,25 +135,59 @@ cells.push(c);
 
 function play(i){
 if(cells[i].innerText!='')return;
+
 cells[i].innerText=player;
+
+checkWin();
+
 player=player==='X'?'O':'X';
 }
 
-// MEMORY
-const icons=['🍎','🍌','🍇','🍒','🍎','🍌','🍇','🍒'];
-icons.sort(()=>Math.random()-0.5);
-const mem=document.getElementById('memory');
-let opened=[];
+function checkWin(){
+const w=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
 
-icons.forEach((icon,i)=>{
+for(let combo of w){
+let a=cells[combo[0]].innerText;
+let b=cells[combo[1]].innerText;
+let c=cells[combo[2]].innerText;
+
+if(a && a===b && a===c){
+document.getElementById('ticResult').innerText='Câștigă '+a;
+}
+}
+}
+
+function resetTic(){
+cells.forEach(c=>c.innerText='');
+document.getElementById('ticResult').innerText='';
+player='X';
+}
+
+// MEMORY
+let icons=['🍎','🍌','🍇','🍒','🍎','🍌','🍇','🍒'];
+let opened=[];
+const mem=document.getElementById('memory');
+
+function createMemory(){
+mem.innerHTML='';
+icons.sort(()=>Math.random()-0.5);
+
+icons.forEach(icon=>{
 let card=document.createElement('div');
 card.className='card';
 card.innerText='?';
 card.onclick=()=>flip(card,icon);
 mem.appendChild(card);
 });
+}
 
 function flip(card,icon){
+if(opened.length===2 || card.innerText!== '?') return;
+
 card.innerText=icon;
 opened.push({card,icon});
 
@@ -143,11 +202,20 @@ opened=[];
 }
 }
 
+function resetMemory(){
+opened=[];
+createMemory();
+}
+
+createMemory();
+
+// DICE
 function rollDice(){
 let n=Math.floor(Math.random()*6)+1;
 document.getElementById('dice').innerText='Zar: '+n;
 }
 
+// COIN
 function coin(){
 let r=Math.random()<0.5?'Cap':'Pajura';
 document.getElementById('coin').innerText=r;
@@ -157,36 +225,3 @@ document.getElementById('coin').innerText=r;
 
 </body>
 </html>
-// verifică pereți
-if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400){
-alert("Game Over");
-snake=[{x:200,y:200}];
-dx=20;
-dy=0;
-}
-function checkWin(){
-const w=[
-[0,1,2],[3,4,5],[6,7,8],
-[0,3,6],[1,4,7],[2,5,8],
-[0,4,8],[2,4,6]
-];
-
-for(let combo of w){
-let a=cells[combo[0]].innerText;
-let b=cells[combo[1]].innerText;
-let c=cells[combo[2]].innerText;
-
-if(a && a===b && a===c){
-document.getElementById("ticResult").innerText="Câștigă "+a;
-}
-}
-}
-function play(i){
-if(cells[i].innerText!='')return;
-cells[i].innerText=player;
-checkWin();
-player=player==='X'?'O':'X';
-}<h2>Alege un joc</h2>
-<button onclick="window.scrollTo(0,200)">Snake</button>
-<button onclick="window.scrollTo(0,600)">X și 0</button>
-<button onclick="window.scrollTo(0,1000)">Memory</button>
