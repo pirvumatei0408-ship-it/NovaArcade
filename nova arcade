@@ -251,3 +251,89 @@ document.getElementById("coinResult").innerText=r
 
 </body>
 </html>
+// SNAKE FIXED
+
+const canvas = document.getElementById("snakeCanvas");
+const ctx = canvas.getContext("2d");
+
+let snake;
+let food;
+let dx;
+let dy;
+let gameInterval;
+
+function startSnake(){
+
+snake=[{x:200,y:200}];
+food={x:100,y:100};
+dx=20;
+dy=0;
+
+if(gameInterval) clearInterval(gameInterval);
+gameInterval=setInterval(draw,120);
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,400,400);
+
+snake.forEach(p=>{
+ctx.fillStyle="lime";
+ctx.fillRect(p.x,p.y,20,20);
+});
+
+ctx.fillStyle="red";
+ctx.fillRect(food.x,food.y,20,20);
+
+let head={
+x:snake[0].x+dx,
+y:snake[0].y+dy
+};
+
+if(head.x<0||head.x>=400||head.y<0||head.y>=400){
+alert("Game Over");
+startSnake();
+return;
+}
+
+snake.unshift(head);
+
+if(head.x===food.x && head.y===food.y){
+
+food.x=Math.floor(Math.random()*20)*20;
+food.y=Math.floor(Math.random()*20)*20;
+
+}else{
+
+snake.pop();
+
+}
+
+}
+
+window.addEventListener("keydown",e=>{
+
+if(e.key==="ArrowUp" && dy===0){
+dx=0;
+dy=-20;
+}
+
+if(e.key==="ArrowDown" && dy===0){
+dx=0;
+dy=20;
+}
+
+if(e.key==="ArrowLeft" && dx===0){
+dx=-20;
+dy=0;
+}
+
+if(e.key==="ArrowRight" && dx===0){
+dx=20;
+dy=0;
+}
+
+});
+
+startSnake();
